@@ -46,6 +46,7 @@
         </div>
       </el-dialog>
     </div>
+    <div>{{data}}</div>
   </div>
 </template>
 
@@ -206,6 +207,7 @@ export default {
         .then(resp => {
         
           this.data = JSON.parse(JSON.stringify(resp.data.children));
+          
         })
         .catch(err => {
           throw err;

@@ -2,10 +2,11 @@
 export const tableCalculator = {
 
     sum: (data, columIndex) => {
-         if(data==null) return;
         let sum1 = 0;
         data.forEach(element => {
-            sum1 = sum1 + parseFloat(element[columIndex]);
+            let val = element[columIndex];
+            val = (val == '' || val == null||val=='undefined') ? '0' : val.trim();
+            sum1 = sum1 + parseFloat(val);
         });
 
         return sum1.toFixed(2);

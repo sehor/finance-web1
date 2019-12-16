@@ -14,7 +14,7 @@
           :filter-node-method="filterNode"
         >
           <span class="custom-tree-node" slot-scope="{ node, data }">
-            <span>({{ data.id }})</span>
+            <span>({{ data.number}})</span>
             <span>{{ data.label }}</span>
             <span>
               <el-button type="text" size="mini" @click="()=>edit(node,data)">Edit</el-button>
@@ -51,6 +51,7 @@
 
 <script>
 let id = 1000;
+var log=console.log
 import axios from "axios";
 import QS from "qs";
 export default {
@@ -205,6 +206,7 @@ export default {
       })
         .then(resp => {
         
+         log(resp.data.children);
           this.data = JSON.parse(JSON.stringify(resp.data.children));
         })
         .catch(err => {

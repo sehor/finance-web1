@@ -1,8 +1,34 @@
 <template>
   <div>
+    <div id="vuex">
+      <p>Vuex</p>
+      <div>
+        <label>count:</label>
+        <span>{{count}}</span>
+      </div>
+      <div>
+        <label>alias:</label>
+        <span>{{alias}}</span>
+      </div>
+      <div>
+        <label>countPlusLocalState:</label>
+        <span>{{countPlusLocalState}}</span>
+      </div>
+    </div>
+
+    <div>
+      <p>API</p>
+
+      <ul>
+        <li
+          v-for="(item,index) of allAccClas"
+          :key="index"
+        >id:{{item.id}} name:{{item.name}} parentId:{{item.parentId}}</li>
+      </ul>
+    </div>
     <p id="title_P">Test</p>
     <button @click="practic1">Click!</button>
-    <form id="test-form" action="#0" onsubmit="return false;">
+    <form id="test-form1" action="#0" onsubmit="return false;">
       <p>
         <label>
           Name:
@@ -62,7 +88,7 @@
     </div>
 
     <!-- HTML结构 -->
-    <form id="test-form" action="test">
+    <form id="test-form2" action="test">
       <legend>请选择想要学习的编程语言：</legend>
       <fieldset>
         <p>
@@ -103,12 +129,11 @@
         </p>
       </fieldset>
     </form>
-
-    <div id='vuex'>
-      <p>Vuex</p>
-      <div><label >count:</label> <span>{{count}}</span></div>
-     <div> <label >alias:</label> <span>{{alias}}</span></div>
-      <div><label >countPlusLocalState:</label> <span>{{countPlusLocalState}}</span></div>
+    <div>
+      操作
+      <button @click="_deleteAccClaById">deleteAccClaById</button>
+      <button @click="_addAccCla">addAccCla</button>
+      <button @click="_updateAccCla">updateAccCla</button>
     </div>
   </div>
 </template>
@@ -116,14 +141,13 @@
 <script>
 import $ from "jquery";
 import _ from "underscore";
-import {mapState} from 'vuex'
-var log = function(val) {
-  console.log(val);
-};
+import { mapState, mapMutations } from "vuex";
+import accCla from "../api/accCla.js";
+var log = console.log;
 export default {
   data() {
     return {
-      
+      allAccClas: []
     };
   },
   methods: {
@@ -167,21 +191,53 @@ export default {
       });
 
       ul.append(sorted);
+    },
+    getAllAccCla() {
+      accCla.getAll();
+    },
+    ...mapMutations([
+      "initAccClas",
+      "deleteAccClaById",
+      "addAccCla",
+      "updateAccCla",
+      "increment"
+    ]),
+    _deleteAccClaById() {
+      this.deleteAccClaById("3001");
+    },
+
+    _addAccCla() {
+      this.addAccCla({ id: "3001", name: "利润", parentId: "root" });
+    },
+    _updateAccCla() {
+      this.updateAccCla({ id: "3001", name: "好多利润", parentId: "root" });
     }
   },
-  created() {},
-  computed:{
-     
-     ...mapState({
-        count:(state)=>state.count*2,
-        alias:'count',
-        countPlusLocalState (state) {
-        return state.count + this.count
-    }
-     })
-     
-     }
-  
+  created() {
+    accCla
+      .getAll()
+      .then(resp => {
+        this.allAccClas = resp.sort((x, y) => {
+          let len = Math.min(x.id.length, y.id.length);
+          return x.id.slice(0, len) - y.id.slice(0, len);
+        });
+      })
+      .catch(err => log(err));
+
+    //log('getAccCla',accCla.getById('200101'));
+    //accCla.add({ id: '10010103', number: '10010102', name: '微信理财', parentId: '100101', chidlren: [] });
+    //log('getAccCla',accCla.getById('10010102'))
+    //accCla.deleteById('10010102');
+  },
+  computed: {
+    ...mapState({
+      count: state => state.count * 2,
+      alias: "count",
+      countPlusLocalState(state) {
+        return state.count + this.count;
+      }
+    })
+  }
 };
 
 $(function() {
@@ -207,6 +263,5 @@ $(function() {
     e.preventDefault();
     alert(form.serialize());
   });
-
 });
 </script>

@@ -13,7 +13,7 @@ export default new Vuex.Store({
       { index: 2, value: 'javaScript study', done: false },
       { index: 1, value: 'ES2015 study', done: true },
     ],
-    accClas: []
+    accClas: ''
   },
   mutations: {
     increment(state, playLoad) {

@@ -13,14 +13,19 @@
         <div>getTodoByIndex:{{getTodoByIndex(2)}}</div>
         <div class="block">
           <span class="demonstration">单选可搜索</span>
-          <el-cascader placeholder="试试搜索.." :options="getAccClasTree" filterable :props="{ value: 'id', label: 'name'}"></el-cascader>
+          <el-cascader
+            placeholder="试试搜索.."
+            :options="getAccClasTree"
+            filterable
+            :props="{ value: 'id', label: 'name'}"
+          ></el-cascader>
         </div>
-       <div>操作
-         <button @click="_deleteAccClaById">deleteAccClaById</button>
-         <button @click="_addAccCla">addAccCla</button>
-         <button @click="_updateAccCla">updateAccCla</button>
-         
-       </div>
+        <div>
+          操作
+          <button @click="_deleteAccClaById">deleteAccClaById</button>
+          <button @click="_addAccCla">addAccCla</button>
+          <button @click="_updateAccCla">updateAccCla</button>
+        </div>
       </div>
     </div>
   </div>
@@ -34,35 +39,27 @@ import { mapGetters, mapMutations } from "vuex";
 export default {
   created() {
     if (this.$store.state.accClas.length == 0) {
-      accCalApi
-        .getAll()
-        .then(resp => {
-          this.$store.commit("initAccClas", resp);
-        })
-        .catch(err => log(err));
+      log("nothig!");
     }
-
   },
   methods: {
-    ...mapMutations(
-      [
-        'initAccClas',
-        'deleteAccClaById',
-        'addAccCla',
-        'updateAccCla',
-        'increment'
-      ]
-      ),
-      _deleteAccClaById(){
-         this.deleteAccClaById('3001')
-      },
+    ...mapMutations([
+      "initAccClas",
+      "deleteAccClaById",
+      "addAccCla",
+      "updateAccCla",
+      "increment"
+    ]),
+    _deleteAccClaById() {
+      this.deleteAccClaById("3001");
+    },
 
-      _addAccCla(){
-         this.addAccCla({id:'3001',name:'利润',parentId:'2001'})
-      },
-      _updateAccCla(){
-        this.updateAccCla({id:'3001',name:'好多利润',parentId:'root'});
-      }
+    _addAccCla() {
+      this.addAccCla({ id: "3001", name: "利润", parentId: "2001" });
+    },
+    _updateAccCla() {
+      this.updateAccCla({ id: "3001", name: "好多利润", parentId: "root" });
+    }
 
     /*  incrementCouont() {
       this.$store.commit("increment", { skip: 2 });

@@ -17,7 +17,6 @@
       :data="tableData"
       :edit-config="{trigger: 'click', mode: 'cell'}"
       :mouse-config="{selected: true}"
-      :keyboard-config="{isArrow: true, isDel: true, isEnter:true,isTab:true,isEdit: true}"
       :footer-span-method="footerColspanMethod"
       :footer-method="footerMethod"
       @edit-closed="editClosedHandle"
@@ -39,7 +38,7 @@
         field="classification"
         title="科目"
         width="300"
-        :edit-render="{name: 'ElCascader',props:{options:classification,filterable:true,clearable:true},events:{keydown:keydownHandle}}"
+        :edit-render="{name: 'ElCascader',props:{options:classification,filterable:true,clearable:true},events:{change:cascChange}}"
       ></vxe-table-column>
 
       <vxe-table-column
@@ -60,7 +59,10 @@
 </template>
 
 <script>
+var log=console.log;
+var map=new Map([[1,'brief'],[2,'classification'],[3,'debit'],[4,'credit']]);
 import Axios from 'axios';
+import $ from 'jquery'
 export default {
   data() {
     return {
@@ -71,10 +73,8 @@ export default {
           { min: 2, message: "至少两个字额" }
         ],
         classification: [{ required: true, message: "科目不能为空" }],
-        debit: [{ type: "number", message: "请输入数字" }],
-        credit: [{ type: "number", message: "please enter number" }]
       },
-      classification: [],
+      classification: [{value:'zichang',label:'资产',children:[{value:'flowedAssert',label:'流动资产'}]}],
       selectRow: null,
       selectColumn: null
     };
@@ -102,7 +102,7 @@ export default {
           classification: ["zichang", "flowedAssert"]
         }
       ];
-      this.getRootAccCla();
+      //this.getRootAccCla();
       this.loading = false;
     }, 100);
   },
@@ -205,7 +205,7 @@ export default {
           this.tableData[rowIndex]["credit"] = "";
         }
       } else if (["credit"].includes(column.property)) {
-        if (isNaN(this.tableData[rowIndex]["credit"])) {
+        if (isNaN(this.tableData[rowIndex]["credit"])&&this.tableData[rowIndex]["credit"]!=='=') {
           this.tableData[rowIndex]["credit"] = "";
           this.$message({
             message: "必须输入数字",
@@ -223,6 +223,9 @@ export default {
           });
           this.tableData[rowIndex]["debit"] = "";
         }
+      }else if (["calssifcation"].includes(column.property)){
+        
+        this.$refs.xTable.setActiveCell(row,'debit');
       }
     },
     cellClickHandle(
@@ -230,6 +233,7 @@ export default {
       event
     ) {
       //自动填充摘要栏
+       if(rowIndex<0) return;
       let val = this.tableData[rowIndex]["brief"];
       if (
         rowIndex > 0 &&
@@ -250,7 +254,14 @@ export default {
     focusHandle({ rowIndex, columnIndex, data }, event) {
       //console.log(rowIndex,columnIndex,data)
     },
+ cascChange({ row, rowIndex, column, columnIndex }, event){
+   
+    if(this.tableData[rowIndex]['classification']=='') return;
+    this.$refs.xTable.setActiveCell(row, "debit");
+
+ },
     keydownHandle({ row, rowIndex, column, columnIndex }, event) {
+
       if (event.keyCode == 32) {
         if (column.title === "借方") {
           this.$refs.xTable.setSelectCell(row, "credit");
@@ -273,26 +284,36 @@ export default {
       }
 
       if (event.keyCode == 187) {
+        log(event.keyCode)
+        
         if (column.title == "借方") {
           this.$refs.xTable.setSelectCell(row, "credit");
           let val = parseFloat(this.tableData[rowIndex]["debit"]) || 0;
           this.tableData[rowIndex]["debit"] =
-            this.totalCredit - this.totalDebit + val + "";
+            this.totalCredit - (this.totalDebit - val )+ "";
         } else if (column.title == "贷方") {
           this.$refs.xTable.setSelectCell(row, "debit");
           let val = parseFloat(this.tableData[rowIndex]["credit"]) || 0;
-          this.tableData[rowIndex]["credit"] =
-            this.totalCredit - this.totalDebit + val + "";
+          this.tableData[rowIndex]["credit"] =this.totalDebit - this.totalCredit+ val + "";
         }
         event.stopPropagation();
         setTimeout(() => {
           this.$refs.xTable.updateFooter();
         }, 300);
       }
-
-      if(event.keyCode==13){
-         console.log(rowIndex,columnIndex)
-      }
+      if(event.keyCode==13||event.keyCode==9){
+          
+          if(columnIndex<4) {
+            this.$refs.xTable.setActiveCell(row,map.get(columnIndex+1));
+            log(this.tableData[rowIndex]['_XID']);
+          }else{
+             if(rowIndex<this.tableData.length-1){
+                let nextRow=this.$refs.xTable.getRowById(this.tableData[rowIndex+1]['_XID']);
+                this.$refs.xTable.setActiveCell(nextRow,'brief');
+             }
+          }  
+          event.stopPropagation();
+      } 
     },
     getRootAccCla(){
       Axios({
@@ -322,6 +343,9 @@ export default {
     totalCredit: function() {
       return this.tableCal.sum(this.tableData, "credit");
     }
+  },
+  mounted(){
+  
   }
 };
 </script>

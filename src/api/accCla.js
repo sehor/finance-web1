@@ -10,23 +10,20 @@ var allAccClas = [
     { id: '200101', number: '200101', name: '不想还', parentId: '2001' },
 ];
 
-
+import axios from 'axios'
 export default {
 
     getAll: () => {
 
-        return new Promise((resolve, reject) => {
-            let r = Math.random() * 10
-            setTimeout(() => {
-                if (r <= 9.8) {
-                    resolve(allAccClas);
-                }
-                else {
-                    reject('sorry,failed!')
-                }
-
-            }, 50);
-        });
+        axios({
+            baseURL:'http://localhost:8083',
+            url:'/AccCla/findAll',
+            type:'get'
+        }).then(resp=>{
+            return resp;
+        }).catch(err=>{
+            throw err;
+        })
     },
 
     getById: (id) => {
